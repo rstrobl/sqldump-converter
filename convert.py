@@ -10,12 +10,14 @@ Usage: python convert.py [args] [sqldumpfile] > [outputfile]
 
 Options and arguments:
 	--format [xml|json]	-f [xml|json]	: specify output format, can be either JSON or XML
+	--pretty-print		-p 		: indents output for eye-candy
 	--help			-h		: this text
 """
 
+pretty_print = False
 
 try:
-	optlist, args = getopt.getopt(sys.argv[1:], 'hf:', ['help', 'format='])
+	optlist, args = getopt.getopt(sys.argv[1:], 'hpf:', ['help', 'pretty-print', 'format='])
 
 except getopt.GetoptError:
 	print_usage_text()
@@ -32,6 +34,9 @@ for opt, arg in optlist:
 		if format not in ['json', 'xml']:
 			print_usage_text()
 			sys.exit(2)
+
+	elif opt in ('-p', '--pretty-print'):
+		pretty_print = True
 			
 dumpfilename = sys.argv[-1]
 
@@ -58,6 +63,5 @@ for line in dumpfile:
 		rows.append(dict(map(lambda k,v: (k,v), keys, values)))
 
 if format == 'json':
-	print simplejson.dumps(rows, indent="\t")
+	print simplejson.dumps(rows, indent="\t" if pretty_print else None)
 		
-if format == 'xml'	

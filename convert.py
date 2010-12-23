@@ -1,15 +1,17 @@
+# -*- coding: utf-8 -*-
 
 import sys
 import getopt
 import re
 import simplejson
+import yaml
 
 def print_usage_text():
 	print """
 Usage: python convert.py [args] [sqldumpfile] > [outputfile]
 
 Options and arguments:
-	--format [xml|json]	-f [xml|json]	: specify output format, can be either JSON or XML
+	--format [json|yaml]	-f [json|yaml]	: specify output format, can be either JSON or YAML
 	--pretty-print		-p 		: indents output for eye-candy
 	--help			-h		: this text
 """
@@ -31,7 +33,7 @@ for opt, arg in optlist:
 	elif opt in ('-f', '--format'):
 		format = arg
 
-		if format not in ['json', 'xml']:
+		if format not in ['json', 'yaml']:
 			print_usage_text()
 			sys.exit(2)
 
@@ -45,7 +47,8 @@ try:
 except IOError:
 	print "ERROR: File \"" + dumpfilename + "\" was not found."
 	sys.exit(3)
-	
+
+# we only need the INSERTs as information
 regex = re.compile(r"INSERT INTO [`'\"](?P<table>\w+)[`'\"] \((?P<columns>.+)\) VALUES\((?P<values>.+)\)")
 rows = []
 
@@ -60,8 +63,12 @@ for line in dumpfile:
 		keys = map(lambda w: w.strip(" `'\""), match.group('columns').split(','))
 		values = map(lambda w: w.strip(" `'\""), match.group('values').split(','))
 	
+		# convert data to dictionary and append to results
 		rows.append(dict(map(lambda k,v: (k,v), keys, values)))
+		if len(rows) == 10:
+			break
 
 if format == 'json':
 	print simplejson.dumps(rows, indent="\t" if pretty_print else None)
-		
+elif format == 'yaml':
+	print yaml.dump(rows, indent=4 if pretty_print else None)

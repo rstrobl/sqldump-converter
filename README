@@ -1,0 +1,14 @@
+sqldump-converter
+=================
+This is a simple converter which can convert SQL dumps
+to JSON and YAML which might be useful to create fixtures.
+
+Dependencies:
+$ pip install simplejson
+$ pip install pyyaml
+
+Usage example:
+$ ./convert.py -pf json sql/examples.dump > fixtures/examples.json
+
+For more information type:
+$ ./convert.py --help

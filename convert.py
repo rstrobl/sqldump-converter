@@ -1,15 +1,18 @@
+
 import sys
 import getopt
 import re
+import simplejson
 
 def print_usage_text():
 	print """
-Usage: python convert.py [args] [sqldumpfile]
+Usage: python convert.py [args] [sqldumpfile] > [outputfile]
 
 Options and arguments:
 	--format [xml|json]	-f [xml|json]	: specify output format, can be either JSON or XML
 	--help			-h		: this text
 """
+
 
 try:
 	optlist, args = getopt.getopt(sys.argv[1:], 'hf:', ['help', 'format='])
@@ -39,14 +42,21 @@ except IOError:
 	sys.exit(3)
 	
 regex = re.compile(r"INSERT INTO [`'\"](?P<table>\w+)[`'\"] \((?P<columns>.+)\) VALUES\((?P<values>.+)\)")
+rows = []
 
 for line in dumpfile:
 	match = regex.match(line)
 	
+	# non-INSERTS will be ignored
 	if match:
  		table = match.group('table')
 
 		# split parameters and remove their leading and trailing `-tags and whitespaces
 		keys = map(lambda w: w.strip(" `'\""), match.group('columns').split(','))
 		values = map(lambda w: w.strip(" `'\""), match.group('values').split(','))
+	
+		rows.append(dict(map(lambda k,v: (k,v), keys, values)))
+
+print simplejson.dumps(rows)
+		
 		

@@ -1,5 +1,6 @@
 import sys
 import getopt
+import re
 
 def print_usage_text():
 	print """
@@ -37,5 +38,15 @@ except IOError:
 	print "ERROR: File \"" + dumpfilename + "\" was not found."
 	sys.exit(3)
 	
+regex = re.compile(r"INSERT INTO [`'\"](?P<table>\w+)[`'\"] \((?P<columns>.+)\) VALUES\((?P<values>.+)\)")
+
 for line in dumpfile:
-	pass
+	match = regex.match(line)
+	
+	if match:
+ 		table = match.group('table')
+
+		# split parameters and remove their leading and trailing `-tags and whitespaces
+		keys = map(lambda w: w.strip(" `'\""), match.group('columns').split(','))
+		values = map(lambda w: w.strip(" `'\""), match.group('values').split(','))
+		

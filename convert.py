@@ -57,6 +57,7 @@ for line in dumpfile:
 	
 		rows.append(dict(map(lambda k,v: (k,v), keys, values)))
 
-print simplejson.dumps(rows)
+if format == 'json':
+	print simplejson.dumps(rows, indent="\t")
 		
-		
+if format == 'xml'	
